@@ -1,0 +1,30 @@
+# Aplikacja — osobny compose (nginx + php-fpm). Postgres w osobnym compose.
+# Wymaga wspolnej sieci: docker network create kanban_net
+services:
+  php-fpm:
+    build: ./php-fpm
+    container_name: kanban_php
+    env_file: ../../.env
+    volumes:
+      - ../../:/var/www/html
+    networks:
+      - kanban_net
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: kanban_nginx
+    depends_on:
+      - php-fpm
+    ports:
+      - "8080:80"
+    volumes:
+      - ../../:/var/www/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - kanban_net
+    restart: unless-stopped
+
+networks:
+  kanban_net:
+    external: true

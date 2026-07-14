@@ -1,0 +1,27 @@
+# Postgres — osobny compose, idzie na serwer 192.168.1.172.
+# Wymaga wspolnej sieci: docker network create kanban_net
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kanban_postgres
+    env_file: .env
+    volumes:
+      - kanban_pgdata:/var/lib/postgresql/data
+    ports:
+      # tylko lokalnie na hoscie (psql / bin/migrate), nie na cala siec
+      - "127.0.0.1:5432:5432"
+    networks:
+      - kanban_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  kanban_pgdata:
+
+networks:
+  kanban_net:
+    external: true

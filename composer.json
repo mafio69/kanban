@@ -1,0 +1,42 @@
+{
+    "name": "mafio/kanban-urzedowy",
+    "description": "Kanban zapytań urzędowych — backend Slim + SPA",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2",
+        "php-di/php-di": "^7.0",
+        "slim/psr7": "^1.6",
+        "slim/slim": "^4.12",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": [
+            "@check:asserts",
+            "@test:phpunit"
+        ],
+        "check:asserts": "bash scripts/check-trivial-asserts.sh tests",
+        "test:phpunit": "phpunit"
+    },
+    "scripts-descriptions": {
+        "test": "Wszystkie testy: bramka trywialnych asercji + PHPUnit (docelowo dojdzie e2e)",
+        "check:asserts": "Skanuje tests/ pod katem trywialnych asercji (blokuje, gdy znajdzie)",
+        "test:phpunit": "Tylko PHPUnit"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

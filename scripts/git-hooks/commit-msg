@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Druga brama podwojnej zgody: zmiana w tests/** wymaga tokenu [allow-test-change] w opisie commita.
+set -euo pipefail
+
+msg_file="$1"
+changed_tests=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^tests/' || true)
+
+if [ -n "$changed_tests" ]; then
+  if ! grep -q '\[allow-test-change\]' "$msg_file"; then
+    echo "BLOKADA: commit rusza pliki testowe, a opis nie zawiera [allow-test-change]." >&2
+    echo "Druga zgoda brakuje. Dopisz [allow-test-change] do opisu commita." >&2
+    exit 1
+  fi
+fi
+exit 0

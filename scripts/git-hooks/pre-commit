@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Pierwsza brama podwójnej zgody: zmiana w tests/** wymaga pliku .allow-test-change.
+set -euo pipefail
+
+changed_tests=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^tests/' || true)
+
+if [ -n "$changed_tests" ]; then
+  if [ ! -f ".allow-test-change" ]; then
+    echo "BLOKADA: commit rusza pliki testowe:" >&2
+    echo "$changed_tests" | sed 's/^/  - /' >&2
+    echo "" >&2
+    echo "Pierwsza zgoda brakuje. Aby dopuscic zmiane testow:" >&2
+    echo "  1) touch .allow-test-change" >&2
+    echo "  2) commit z tokenem [allow-test-change] w opisie" >&2
+    echo "Po zmianie skasuj .allow-test-change (rm .allow-test-change)." >&2
+    exit 1
+  fi
+fi
+exit 0
