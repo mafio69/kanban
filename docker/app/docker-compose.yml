@@ -5,8 +5,11 @@ services:
     build: ./php-fpm
     container_name: kanban_php
     env_file: ../../.env
+    environment:
+      - LOG_DIR=/var/log/app
     volumes:
       - ../../:/var/www/html
+      - app_logs:/var/log/app
     networks:
       - kanban_net
     restart: unless-stopped
@@ -24,6 +27,9 @@ services:
     networks:
       - kanban_net
     restart: unless-stopped
+
+volumes:
+  app_logs:
 
 networks:
   kanban_net:

@@ -1,0 +1,39 @@
+# Aplikacja (php-fpm + nginx) w root. Uruchomienie: docker compose up -d --build
+#
+# Postgres jest NIEZALEZNY i wspoldzielony (docker/postgres/) — nie nalezy do tego compose.
+# Laczymy sie z nim po wspolnej sieci kanban_net (baza po nazwie kanban_postgres z .env).
+# Raz na maszynie: docker network create kanban_net
+services:
+  php-fpm:
+    build: docker/app/php-fpm
+    container_name: kanban_php
+    env_file: .env
+    environment:
+      - LOG_DIR=/var/log/app
+    volumes:
+      - ./:/var/www/html
+      - app_logs:/var/log/app
+    networks:
+      - kanban_net
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: kanban_nginx
+    depends_on:
+      - php-fpm
+    ports:
+      - "8090:80"
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/app/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - kanban_net
+    restart: unless-stopped
+
+volumes:
+  app_logs:
+
+networks:
+  kanban_net:
+    external: true
