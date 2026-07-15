@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban urzędowy</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, sans-serif; background: #f4f5f7; color: #172b4d; }
+        header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: #fff; border-bottom: 1px solid #dfe1e6; }
+        header h1 { font-size: 18px; margin: 0; }
+        .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 16px; align-items: start; }
+        .column { background: #ebecf0; border-radius: 8px; padding: 8px; min-height: 120px; }
+        .column h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #5e6c84; margin: 4px 6px 10px; }
+        .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 0 rgba(9,30,66,.25); padding: 10px; margin-bottom: 8px; }
+        .card .subject { font-weight: 600; font-size: 14px; }
+        .card .meta { font-size: 12px; color: #5e6c84; margin-top: 4px; }
+        .empty { color: #97a0af; font-size: 12px; padding: 6px; }
+        label { font-size: 13px; color: #5e6c84; display: flex; align-items: center; gap: 6px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Kanban urzędowy</h1>
+        <label><input type="checkbox" id="show-archived"> pokaż zarchiwizowane</label>
+    </header>
+    <main class="board" id="board"></main>
+
+    <script>
+        const STAGES = [
+            ['nowe', 'Nowe'],
+            ['w_trakcie', 'W trakcie'],
+            ['czekam', 'Czekam'],
+            ['odlozone', 'Odłożone'],
+            ['zrobione', 'Zrobione'],
+        ];
+
+        function card(sprawa) {
+            const el = document.createElement('article');
+            el.className = 'card';
+            el.dataset.testid = 'card';
+            const subject = document.createElement('div');
+            subject.className = 'subject';
+            subject.textContent = sprawa.subject || '(bez tematu)';
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            meta.textContent = [sprawa.sender, sprawa.snippet].filter(Boolean).join(' — ');
+            el.append(subject, meta);
+            return el;
+        }
+
+        function render(rows) {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            for (const [stage, label] of STAGES) {
+                const col = document.createElement('section');
+                col.className = 'column';
+                col.dataset.testid = 'column-' + stage;
+                const h = document.createElement('h2');
+                h.textContent = label;
+                col.append(h);
+                const inStage = rows.filter(r => r.stage === stage);
+                if (inStage.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.className = 'empty';
+                    empty.textContent = 'brak';
+                    col.append(empty);
+                } else {
+                    inStage.forEach(r => col.append(card(r)));
+                }
+                board.append(col);
+            }
+        }
+
+        async function load() {
+            const archived = document.getElementById('show-archived').checked ? '1' : '0';
+            const res = await fetch('/api/sprawy?archived=' + archived);
+            render(await res.json());
+        }
+
+        document.getElementById('show-archived').addEventListener('change', load);
+        load();
+    </script>
+</body>
+</html>

@@ -27,7 +27,7 @@ Baza i użytkownik (`kanban_urzedowy` / `kanban`) tworzą się automatycznie prz
 ```bash
 cd docker/app
 docker compose up -d --build
-curl http://localhost:8080/api/health   # {"status":"ok"}
+curl http://localhost:8090/api/health   # {"status":"ok"}
 ```
 
 php-fpm łączy się z Postgresem po nazwie `kanban_postgres` w sieci `kanban_net`
@@ -38,4 +38,5 @@ kontenerem) użyj `DB_HOST=127.0.0.1`.
 
 Hasła tylko w plikach `.env` (`/.env` i `docker/postgres/.env`) — oba w `.gitignore`.
 W repo są jedynie `.env.example` z pustymi placeholderami. Cloudflare Tunnel (`kanban.virral.mf`)
-dochodzi w etapie wdrożenia (E6.4), na razie appka słucha na `localhost:8080`.
+dochodzi w etapie wdrożenia (E6.4), na razie appka słucha na `localhost:8090`
+(port 8080 był zajęty przez inną usługę na tej maszynie).

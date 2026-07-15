@@ -30,6 +30,11 @@ Nowe/W trakcie/Czekam/Odłożone/Zrobione, przełącznik zarchiwizowane.
 **E2 — Gmail.** Sync z etykiety (w teście fixture), przycisk Odśwież, podgląd maila. Widać:
 pobrane maile jako karty w Nowe, bez duplikatów.
 
+**EG — Grupowanie maili w sprawy.** Kolejny mail o tym samym znaku sprawy dołącza się do
+istniejącej sprawy, nie tworzy nowej karty (dopasowanie po znaku sprawy + nadawcy, lokalnie,
+bez AI). Wektory (pgvector) odłożone — patrz [`decyzja-grupowanie-maili.md`](./decyzja-grupowanie-maili.md).
+Widać: jedna sprawa zbiera kilka maili.
+
 **E3 — Skan / OCR.** Upload jpg/png → OCR → karta w Nowe z **edytowalnym** `ocr_text`
 (prepare→confirm). Widać: skan obok tekstu, edycja tekstu zapisuje się.
 

@@ -3,4 +3,6 @@
 .env
 /.phpunit.cache/
 /.allow-test-change
+/playwright-report/
+/e2e-historia/
 *.log

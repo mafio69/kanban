@@ -1,0 +1,11 @@
+{
+    "name": "kanban-urzedowy",
+    "private": true,
+    "scripts": {
+        "e2e": "node scripts/e2e.js",
+        "e2e:install": "playwright install chromium"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.48.0"
+    }
+}

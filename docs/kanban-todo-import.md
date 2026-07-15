@@ -43,6 +43,21 @@ description: Backlog pionowymi plasterkami (backend+SQL+UX razem). Każdy etap: 
 - [ ] E2.V Kontrola wizualna etapu Gmail w przeglądarce
   Cel: użytkownik widzi realnie pobrane (z fixture) maile w kolumnie Nowe.
   Weryfikacja: screenshot + akceptacja użytkownika.
+- [ ] EG.T e2e: nowy mail o istniejącym znaku sprawy dołącza się, nie tworzy nowej karty
+  Cel: fixture z dwoma mailami o tym samym znaku sprawy od tego samego nadawcy; drugi ma się dopiąć do istniejącej sprawy, liczba kart bez zmian + screenshot.
+  Weryfikacja: czerwony przed EG, zielony po. Patrz docs/decyzja-grupowanie-maili.md.
+- [ ] EG.1 Migracja 002: model wielu maili pod jedną sprawą (np. tabela sprawa_emaile)
+  Cel: sprawa może zbierać wiele wątków; koniec zasady 1 mail = 1 sprawa.
+  Weryfikacja: migracja aplikuje się, dedup po thread nadal działa.
+- [ ] EG.2 Ekstrakcja znaku sprawy (regex) + dopasowanie do istniejącej sprawy przy syncu
+  Cel: wyciąga znak/sygnaturę z treści, grupuje maile o tym samym znaku i nadawcy zamiast tworzyć nową sprawę.
+  Weryfikacja: test jednostkowy ekstrakcji na przykładach pism + EG.T.
+- [ ] EG.3 UX: maile zgrupowane pod jedną sprawą (lista wątków na karcie)
+  Cel: karta pokazuje, że sprawa zbiera kilka maili; podgląd każdego.
+  Weryfikacja: EG.T zielony.
+- [ ] EG.V Kontrola wizualna etapu Grupowanie + decyzja o wektorach
+  Cel: użytkownik ocenia, czy dopasowanie deterministyczne wystarcza; jeśli nie — otwieramy temat pgvector (osobna decyzja).
+  Weryfikacja: screenshot + akceptacja; ewentualny wpis o wektorach do docs/decyzja-grupowanie-maili.md.
 - [ ] E3.T e2e: skan jpg -> OCR -> karta w Nowe z edytowalnym ocr_text
   Cel: upload testowego obrazu; OcrService oddaje znany tekst z tokenem (fixture); asercja: nowa karta, ocr_text widoczny i edytowalny, edycja zapisuje się (round-trip DB) + screenshot.
   Weryfikacja: czerwony przed E3, zielony po.

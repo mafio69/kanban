@@ -6,6 +6,9 @@ zasady — zatrzymaj się i napisz, zamiast wykonać.
 **Stack:** Slim 4 + PHP 8.2+ · PostgreSQL (PDO) · frontend SPA (Tailwind + vanilla JS) ·
 osobny `docker compose` · `kanban.virral.mf` przez Cloudflare Tunnel.
 
+**Model pracy** (podział ról Claude/opencode, zasada „bez rozwiązań tymczasowych"):
+`docs/model-pracy-ai.md`.
+
 ## Sekrety
 
 1. NIGDY nie wpisujesz prawdziwych kluczy API ani sekretów. Żadnych `sk-...`, tokenów, haseł.
