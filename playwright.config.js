@@ -18,8 +18,8 @@ module.exports = defineConfig({
         url: 'http://127.0.0.1:8099/api/health',
         reuseExistingServer: false,
         env: {
-            DB_HOST: '127.0.0.1',
-            DB_NAME: 'kanban_urzedowy_test',
+            DB_HOST: process.env.DB_HOST || '127.0.0.1',
+            DB_NAME: process.env.DB_NAME || 'kanban_urzedowy_test',
         },
     },
 });

@@ -2,7 +2,11 @@ const { test, expect } = require('@playwright/test');
 const { execSync } = require('child_process');
 
 // Seed leci do bazy TESTOWEJ (te same zmienne co webServer w playwright.config.js).
-const seedEnv = { ...process.env, DB_HOST: '127.0.0.1', DB_NAME: 'kanban_urzedowy_test' };
+const seedEnv = {
+    ...process.env,
+    DB_HOST: process.env.DB_HOST || '127.0.0.1',
+    DB_NAME: process.env.DB_NAME || 'kanban_urzedowy_test',
+};
 
 function seed(subject, stage) {
     execSync(`php tests/e2e/seed.php ${JSON.stringify(subject)} ${stage}`, { env: seedEnv, stdio: 'pipe' });

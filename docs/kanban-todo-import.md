@@ -1,31 +1,31 @@
 # list: Kanban urzędowy — budowa
 description: Backlog pionowymi plasterkami (backend+SQL+UX razem). Każdy etap: najpierw test e2e (czerwony), potem implementacja aż zielony, na końcu screenshot + kontrola wizualna w przeglądarce. Testy nie do oszukania (losowy token round-trip, realny Postgres, zero mockowania testowanej warstwy) — patrz docs/testy-protokol.md. Auth Google na końcu. Hosting: osobny docker compose na 192.168.1.172, kanban.virral.mf przez Cloudflare Tunnel. Import: php bin/console app:todo:import docs/kanban-todo-import.md
 
-- [ ] E0.T Harness e2e Playwright + zasada test-first (pierwszy task, na przyszłość)
+- [x] E0.T Harness e2e Playwright + zasada test-first (pierwszy task, na przyszłość)
   Cel: Playwright uruchamia realną appkę przeciw realnemu Postgres testowemu; szablon testu z anti-fake (losowy token round-trip + screenshot).
   Weryfikacja: przykładowy test health przechodzi na realnym stacku, artefakt screenshot powstaje.
 - [ ] E0.1 Ochrona testów — git pre-commit + commit-msg (podwójna zgoda)
   Cel: zmiana tests/** wymaga pliku .allow-test-change ORAZ tokenu [allow-test-change] w opisie commita.
   Weryfikacja: bash scripts/install-git-hooks.sh; próba zmiany testu bez zgody = commit odrzucony.
-- [ ] E0.2 Szkielet Slim + kontener DI + strona SPA hello
+- [x] E0.2 Szkielet Slim + kontener DI + strona SPA hello
   Cel: appka wstaje, GET /api/health zwraca 200, SPA renderuje stronę startową.
   Weryfikacja: e2e otwiera stronę w przeglądarce i widzi element startowy + screenshot.
-- [ ] E0.3 Instalacja PostgreSQL + bazy kanban_urzedowy i kanban_urzedowy_test
+- [x] E0.3 Instalacja PostgreSQL + bazy kanban_urzedowy i kanban_urzedowy_test
   Cel: baza produkcyjna i testowa na serwerze, dostęp przez PDO z .env (DB_*).
   Weryfikacja: appka łączy się z bazą, healthcheck DB zielony.
-- [ ] E0.4 Migracja 001_create_sprawy.sql + runner bin/migrate
+- [x] E0.4 Migracja 001_create_sprawy.sql + runner bin/migrate
   Cel: tabela sprawy wg modelu (enumy source/stage, gmail_thread_id UNIQUE nullable, indeksy stage+position), tabela migrations, idempotentny runner.
   Weryfikacja: migracja na czystej bazie, drugie uruchomienie nic nie zmienia.
-- [ ] E1.T e2e: sprawy z bazy widoczne w 5 kolumnach Kanbana
+- [x] E1.T e2e: sprawy z bazy widoczne w 5 kolumnach Kanbana
   Cel: seed spraw z losowymi tokenami w różnych stage; test otwiera appkę i sprawdza, że każda karta jest we właściwej kolumnie + screenshot.
   Weryfikacja: test czerwony przed implementacją E1, zielony po.
-- [ ] E1.1 Backend GET /api/sprawy (etap, position, filtr archived)
+- [x] E1.1 Backend GET /api/sprawy (etap, position, filtr archived)
   Cel: lista spraw z etapem i kolejnością, ?archived=0|1.
   Weryfikacja: smoke test + asercja round-trip tokenu w E1.T.
-- [ ] E1.2 SPA: siatka 5 kolumn + render kart + przełącznik zarchiwizowane
+- [x] E1.2 SPA: siatka 5 kolumn + render kart + przełącznik zarchiwizowane
   Cel: Tailwind grid, karty z GET /api/sprawy, przełącznik pokaż zarchiwizowane.
   Weryfikacja: E1.T zielony.
-- [ ] E1.V Kontrola wizualna etapu Board w przeglądarce
+- [x] E1.V Kontrola wizualna etapu Board w przeglądarce
   Cel: użytkownik potwierdza wygląd i zawartość kolumn na żywej appce.
   Weryfikacja: screenshot z E1.T + akceptacja użytkownika.
 - [ ] E2.T e2e: sync Gmail z fixture pokazuje maile jako karty w Nowe
