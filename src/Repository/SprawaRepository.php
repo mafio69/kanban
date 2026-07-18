@@ -95,4 +95,26 @@ final class SprawaRepository
         $stmt = $this->pdo->prepare('DELETE FROM sprawy WHERE id = :id');
         $stmt->execute([':id' => $id]);
     }
+
+    public function updateFields(int $id, array $fields): void
+    {
+        $allowed = ['subject', 'sender', 'notes', 'ocr_text'];
+        $sets = [];
+        $params = [':id' => $id];
+
+        foreach ($fields as $key => $value) {
+            if (in_array($key, $allowed, true)) {
+                $sets[] = "$key = :$key";
+                $params[":$key"] = $value;
+            }
+        }
+
+        if (empty($sets)) {
+            return;
+        }
+
+        $sql = 'UPDATE sprawy SET ' . implode(', ', $sets) . ' WHERE id = :id';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+    }
 }

@@ -8,6 +8,7 @@ use App\Controller\GmailSyncController;
 use App\Controller\HealthController;
 use App\Controller\MoveController;
 use App\Controller\SprawaController;
+use App\Controller\UpdateController;
 use Slim\App;
 
 return function (App $app): void {
@@ -18,4 +19,5 @@ return function (App $app): void {
     $app->patch('/api/sprawy/{id}/move', [MoveController::class, 'move']);
     $app->patch('/api/sprawy/{id}/archive', [ArchiveController::class, 'archive']);
     $app->delete('/api/sprawy/{id}', [ArchiveController::class, 'delete']);
+    $app->patch('/api/sprawy/{id}', [UpdateController::class, 'update']);
 };
