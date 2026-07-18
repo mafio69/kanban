@@ -8,6 +8,8 @@ module.exports = defineConfig({
     // Wszystko pod jednym folderem e2e-historia/: _ostatni to swiezy przebieg Playwrighta
     // (czyszczony na starcie), datowane kopie robi obok scripts/e2e.js.
     outputDir: 'e2e-historia/_ostatni',
+    // Sekwencyjne uruchomienie - testy dzielą bazę testową, __truncate__ nie izoluje przy parallel
+    workers: 1,
     use: {
         baseURL: 'http://127.0.0.1:8099',
         screenshot: 'only-on-failure',
