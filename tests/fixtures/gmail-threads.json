@@ -1,0 +1,18 @@
+{
+  "threads": [
+    {
+      "id": "thread_1",
+      "snippet": "Tok_abc123 - to jest losowy token testowy",
+      "subject": "Pismo z urzędu - sprawa ABC/123/2024",
+      "from": "urzad@example.gov.pl",
+      "date": "2024-07-18T10:00:00Z"
+    },
+    {
+      "id": "thread_2",
+      "snippet": "Tok_def456 - kolejny losowy token",
+      "subject": "Wezwanie do zapłaty",
+      "from": "windykacja@example.com",
+      "date": "2024-07-18T11:00:00Z"
+    }
+  ]
+}
