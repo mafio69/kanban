@@ -1,0 +1,17 @@
+# Centralna kontrola jakosci przy commicie (GrumPHP). Jeden plik = widac cala ochrone kodu.
+# Na start: format (php-cs-fixer) + analiza statyczna (phpstan) + audyt zaleznosci.
+# Sekrety i trywialne asercje pilnuja jeszcze scripts/secret-guard.sh + check-trivial-asserts.sh
+# w CI (.github/workflows/checks.yml) — przeniesiemy je do git_blacklist po weryfikacji regexpow.
+# PHPUnit celowo poza commitem (potrzebuje bazy) — testy jada w CI.
+grumphp:
+    hide_circumvention_tip: true
+    process_timeout: 180
+    tasks:
+        composer:
+            no_check_publish: true
+        composer_audit: ~
+        phpcsfixer:
+            config: .php-cs-fixer.dist.php
+            diff: true
+        phpstan:
+            configuration: phpstan.dist.neon

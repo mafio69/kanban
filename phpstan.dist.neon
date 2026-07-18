@@ -1,0 +1,10 @@
+parameters:
+    level: 6
+    paths:
+        - src
+        - tests
+    # Jesli phpstan sypie bledami w istniejacym kodzie:
+    #   vendor/bin/phpstan analyse --generate-baseline
+    # potem odkomentuj ponizsze (zamraza stare dlugi, nowe nadal lapane):
+    # includes:
+    #     - phpstan-baseline.neon
