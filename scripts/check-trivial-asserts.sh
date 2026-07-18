@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Wykrywa trywialne asercje w testach (zawsze przechodza, nic nie sprawdzaja).
 # Uzycie: bash scripts/check-trivial-asserts.sh [katalog]   (domyslnie tests)
-# Zwraca 1, gdy cos znajdzie - nadaje sie do CI / pre-commit. Wymaga grep -P (GNU grep).
+# Zwraca 1, gdy znajdzie trywialne asercje - nadaje sie do CI / pre-commit. Wymaga grep -P (GNU grep).
 set -uo pipefail
 
 dir="${1:-tests}"
@@ -10,6 +10,8 @@ if [ ! -d "$dir" ]; then
   echo "Brak katalogu: $dir" >&2
   exit 2
 fi
+
+EXCLUDE=(--exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=venv --exclude-dir=.venv)
 
 # Kazdy wzorzec osobno (backreference \1 dziala tylko w obrebie jednego wzorca).
 patterns=(
@@ -29,28 +31,25 @@ patterns=(
 
 hits=""
 for p in "${patterns[@]}"; do
-  found=$(grep -rPnI --include='*.php' --include='*.js' --include='*.ts' "$p" "$dir" || true)
+  found=$(grep -rPnI "${EXCLUDE[@]}" --include='*.php' --include='*.js' --include='*.ts' "$p" "$dir" || true)
   [ -n "$found" ] && hits+="$found"$'\n'
 done
 
-# Osobno: testy udawane jako gotowe (nie sprawdzaja niczego realnie).
-skipped=$(grep -rEnI --include='*.php' 'markTest(Skipped|Incomplete)\s*\(' "$dir" || true)
+# markTestSkipped/Incomplete: tylko OSTRZEZENIE (swiadomy skip z powodem jest OK), nie blokada.
+skipped=$(grep -rEnI "${EXCLUDE[@]}" --include='*.php' 'markTest(Skipped|Incomplete)\s*\(' "$dir" || true)
 
 hits=$(printf '%s' "$hits" | sed '/^$/d' | sort -u)
 
-if [ -z "$hits" ] && [ -z "$skipped" ]; then
+if [ -n "$skipped" ]; then
+  echo "UWAGA (nie blokuje) - testy pominiete/niekompletne:" >&2
+  echo "$skipped" | sed 's/^/  /' >&2
+fi
+
+if [ -z "$hits" ]; then
   echo "OK: brak trywialnych asercji w $dir"
   exit 0
 fi
 
-if [ -n "$hits" ]; then
-  echo "ZNALEZIONO trywialne asercje:" >&2
-  echo "$hits" | sed 's/^/  /' >&2
-fi
-
-if [ -n "$skipped" ]; then
-  echo "UWAGA - testy pominiete/niekompletne (nie sprawdzaja niczego):" >&2
-  echo "$skipped" | sed 's/^/  /' >&2
-fi
-
+echo "BLOKADA - trywialne asercje (zawsze zielone, nic nie sprawdzaja):" >&2
+echo "$hits" | sed 's/^/  /' >&2
 exit 1

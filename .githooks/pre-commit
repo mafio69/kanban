@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Aktywacja: git config core.hooksPath .githooks  (albo bash scripts/install-git-hooks.sh)
+# Trzy bramki: sekrety, trywialne asercje, ochrona testow.
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+
+# 1) Sekrety w staged plikach.
+bash "$root/scripts/secret-guard.sh" --staged
+
+# 2) Trywialne asercje w testach.
+if [ -d "$root/tests" ]; then
+  bash "$root/scripts/check-trivial-asserts.sh" tests
+fi
+
+# 3) Ochrona testow: zmiana tests/** wymaga pliku .allow-test-change (pierwsza zgoda).
+changed_tests=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^tests/' || true)
+if [ -n "$changed_tests" ] && [ ! -f "$root/.allow-test-change" ]; then
+  echo "BLOKADA: zmiana tests/** wymaga pliku .allow-test-change ORAZ [allow-test-change] w opisie commita." >&2
+  echo "  1) touch .allow-test-change   2) commit z [allow-test-change]   3) rm .allow-test-change" >&2
+  exit 1
+fi

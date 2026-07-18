@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Druga brama ochrony testow: zmiana tests/** wymaga [allow-test-change] w opisie commita.
+set -euo pipefail
+
+msg_file="$1"
+changed_tests=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^tests/' || true)
+
+if [ -n "$changed_tests" ] && ! grep -q '\[allow-test-change\]' "$msg_file"; then
+  echo "BLOKADA: zmiana tests/** wymaga [allow-test-change] w opisie commita." >&2
+  exit 1
+fi

@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
-# Instaluje hooki ochrony testow do .git/hooks. Uruchom z katalogu repo: bash scripts/install-git-hooks.sh
+# Aktywuje hooki z .githooks/ (secret-guard + trivial-guard + ochrona testow).
+# Jedna komenda, hooki wersjonowane w repo — bez kopiowania do .git/hooks.
 set -euo pipefail
 
-root=$(git rev-parse --show-toplevel)
-src="$root/scripts/git-hooks"
-dst="$root/.git/hooks"
+cd "$(git rev-parse --show-toplevel)"
+git config core.hooksPath .githooks
+chmod +x .githooks/* scripts/*.sh 2>/dev/null || true
 
-for hook in pre-commit commit-msg; do
-  cp "$src/$hook" "$dst/$hook"
-  chmod +x "$dst/$hook"
-  echo "zainstalowano: $dst/$hook"
-done
-
-echo "Gotowe. Zmiana tests/** wymaga teraz: plik .allow-test-change ORAZ [allow-test-change] w opisie commita."
+echo "Aktywowano .githooks/ (core.hooksPath)."
+echo "Bramki: sekrety, trywialne asercje, ochrona tests/**."
