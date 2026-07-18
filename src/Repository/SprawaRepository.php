@@ -73,16 +73,26 @@ final class SprawaRepository
 
     public function move(int $id, string $stage, int $position): void
     {
-        // Przelicz position w kolumnie docelowej
         $stmt = $this->pdo->prepare(
             'UPDATE sprawy SET position = position + 1 WHERE stage = :stage AND position >= :position'
         );
         $stmt->execute([':stage' => $stage, ':position' => $position]);
 
-        // Przenies sprawe
         $stmt = $this->pdo->prepare(
             'UPDATE sprawy SET stage = :stage, position = :position WHERE id = :id'
         );
         $stmt->execute([':stage' => $stage, ':position' => $position, ':id' => $id]);
+    }
+
+    public function setArchived(int $id, bool $archived): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE sprawy SET archived = :archived WHERE id = :id');
+        $stmt->execute([':archived' => $archived, ':id' => $id]);
+    }
+
+    public function delete(int $id): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM sprawy WHERE id = :id');
+        $stmt->execute([':id' => $id]);
     }
 }
