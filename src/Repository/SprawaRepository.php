@@ -44,6 +44,14 @@ final class SprawaRepository
         return $result ?: null;
     }
 
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM sprawy WHERE id = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -61,5 +69,20 @@ final class SprawaRepository
             ':snippet' => $snippet,
         ]);
         return $stmt->fetch();
+    }
+
+    public function move(int $id, string $stage, int $position): void
+    {
+        // Przelicz position w kolumnie docelowej
+        $stmt = $this->pdo->prepare(
+            'UPDATE sprawy SET position = position + 1 WHERE stage = :stage AND position >= :position'
+        );
+        $stmt->execute([':stage' => $stage, ':position' => $position]);
+
+        // Przenies sprawe
+        $stmt = $this->pdo->prepare(
+            'UPDATE sprawy SET stage = :stage, position = :position WHERE id = :id'
+        );
+        $stmt->execute([':stage' => $stage, ':position' => $position, ':id' => $id]);
     }
 }

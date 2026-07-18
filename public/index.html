@@ -14,9 +14,11 @@
         .btn:disabled { background: #dfe1e6; color: #5e6c84; cursor: not-allowed; }
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 16px; align-items: start; }
         .column { background: #ebecf0; border-radius: 8px; padding: 8px; min-height: 120px; }
+        .column.drag-over { background: #dfe1e6; }
         .column h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #5e6c84; margin: 4px 6px 10px; }
-        .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 0 rgba(9,30,66,.25); padding: 10px; margin-bottom: 8px; cursor: pointer; }
+        .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 0 rgba(9,30,66,.25); padding: 10px; margin-bottom: 8px; cursor: grab; }
         .card:hover { background: #fafbfc; }
+        .card.dragging { opacity: 0.5; cursor: grabbing; }
         .card .subject { font-weight: 600; font-size: 14px; }
         .card .meta { font-size: 12px; color: #5e6c84; margin-top: 4px; }
         .empty { color: #97a0af; font-size: 12px; padding: 6px; }
@@ -55,11 +57,14 @@
             ['zrobione', 'Zrobione'],
         ];
 
+        let draggedCard = null;
+
         function card(sprawa) {
             const el = document.createElement('article');
             el.className = 'card';
             el.dataset.testid = 'card';
             el.dataset.id = sprawa.id;
+            el.draggable = true;
             const subject = document.createElement('div');
             subject.className = 'subject';
             subject.textContent = sprawa.subject || '(bez tematu)';
@@ -67,8 +72,23 @@
             meta.className = 'meta';
             meta.textContent = [sprawa.sender, sprawa.snippet].filter(Boolean).join(' — ');
             el.append(subject, meta);
+
+            el.addEventListener('dragstart', (e) => {
+                draggedCard = el;
+                el.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            el.addEventListener('dragend', () => {
+                el.classList.remove('dragging');
+                draggedCard = null;
+                document.querySelectorAll('.column').forEach(col => col.classList.remove('drag-over'));
+            });
+
             if (sprawa.source === 'email') {
-                el.addEventListener('click', () => showEmail(sprawa.id));
+                el.addEventListener('click', (e) => {
+                    if (!draggedCard) showEmail(sprawa.id);
+                });
             }
             return el;
         }
@@ -80,6 +100,7 @@
                 const col = document.createElement('section');
                 col.className = 'column';
                 col.dataset.testid = 'column-' + stage;
+                col.dataset.stage = stage;
                 const h = document.createElement('h2');
                 h.textContent = label;
                 col.append(h);
@@ -92,6 +113,35 @@
                 } else {
                     inStage.forEach(r => col.append(card(r)));
                 }
+
+                col.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    col.classList.add('drag-over');
+                });
+
+                col.addEventListener('dragleave', () => {
+                    col.classList.remove('drag-over');
+                });
+
+                col.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    col.classList.remove('drag-over');
+                    if (!draggedCard) return;
+
+                    const id = draggedCard.dataset.id;
+                    const stage = col.dataset.stage;
+                    const position = col.querySelectorAll('.card').length;
+
+                    await fetch('/api/sprawy/' + id + '/move', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ stage, position }),
+                    });
+
+                    await load();
+                });
+
                 board.append(col);
             }
         }
