@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Repository\SprawaRepository;
+use App\Service\GmailSyncService;
 use App\Support\Env;
 use Psr\Container\ContainerInterface;
 
@@ -20,5 +22,17 @@ return [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
+    },
+
+    GmailSyncService::class => function (ContainerInterface $c): GmailSyncService {
+        $fixturePath = Env::get('GMAIL_FIXTURE_PATH', '');
+        return new GmailSyncService(
+            $c->get(SprawaRepository::class),
+            $fixturePath,
+        );
+    },
+
+    SprawaRepository::class => function (ContainerInterface $c): SprawaRepository {
+        return new SprawaRepository($c->get(PDO::class));
     },
 ];

@@ -14,10 +14,6 @@ function seed(subject, stage) {
     execSync(`php tests/e2e/seed.php ${JSON.stringify(subject)} ${stage}`, { env: seedEnv, stdio: 'pipe' });
 }
 
-function seedEmail(threadId, subject, sender, snippet) {
-    execSync(`php tests/e2e/seed-email.php ${JSON.stringify(threadId)} ${JSON.stringify(subject)} ${JSON.stringify(sender)} ${JSON.stringify(snippet)}`, { env: seedEnv, stdio: 'pipe' });
-}
-
 test.beforeEach(() => {
     execSync('php tests/e2e/seed.php __truncate__', { env: seedEnv, stdio: 'pipe' });
 });
@@ -27,29 +23,32 @@ test('sync Gmail z fixture pokazuje maile jako karty w Nowe, drugi sync nie dubl
     const fixturePath = path.join(__dirname, '..', 'fixtures', 'gmail-threads.json');
     const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf-8'));
 
-    // Seeduj maile do bazy testowej (symulacja tego, co zrobi GmailSyncService)
-    for (const thread of fixture.threads) {
-        seedEmail(thread.id, thread.subject, thread.from, thread.snippet);
-    }
+    // Ustaw sciezke do fixture w env (zeby GmailSyncService czytal z pliku)
+    process.env.GMAIL_FIXTURE_PATH = fixturePath;
 
     // Otworz appke
     await page.goto('/');
 
-    // Sprawdz czy maile sa w kolumnie Nowe
+    // Na start kolumna Nowe powinna byc pusta
     const nowe = page.getByTestId('column-nowe');
+    await expect(nowe.getByTestId('card')).toHaveCount(0);
+
+    // Kliknij Odswiez
+    await page.getByTestId('btn-refresh').click();
+
+    // Poczekaj az karty sie pojawią
     for (const thread of fixture.threads) {
         await expect(nowe.getByText(thread.snippet)).toBeVisible();
     }
 
-    // Sprawdz czy nie ma duplikatow - liczba kart = liczba watkow
+    // Sprawdz czy liczba kart = liczba watkow
     const cards = nowe.getByTestId('card');
+    await expect(cards).toHaveCount(fixture.threads.length);
+
+    // Kliknij Odswiez ponownie - nie powinno byc duplikatow
+    await page.getByTestId('btn-refresh').click();
     await expect(cards).toHaveCount(fixture.threads.length);
 
     // Screenshot
     await page.screenshot({ path: testInfo.outputPath('gmail-sync.png'), fullPage: true });
-
-    // Symuluj drugi sync - powinien nie dodawac duplikatow
-    // (na razie bez implementacji - test bedzie czerwony)
-    // Po implementacji: await page.getByTestId('btn-refresh').click();
-    // await expect(cards).toHaveCount(fixture.threads.length);
 });

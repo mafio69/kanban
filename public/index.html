@@ -9,22 +9,42 @@
         body { margin: 0; font-family: system-ui, sans-serif; background: #f4f5f7; color: #172b4d; }
         header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: #fff; border-bottom: 1px solid #dfe1e6; }
         header h1 { font-size: 18px; margin: 0; }
+        .btn { background: #0052cc; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; font-size: 14px; }
+        .btn:hover { background: #0065ff; }
+        .btn:disabled { background: #dfe1e6; color: #5e6c84; cursor: not-allowed; }
         .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 16px; align-items: start; }
         .column { background: #ebecf0; border-radius: 8px; padding: 8px; min-height: 120px; }
         .column h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #5e6c84; margin: 4px 6px 10px; }
-        .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 0 rgba(9,30,66,.25); padding: 10px; margin-bottom: 8px; }
+        .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 0 rgba(9,30,66,.25); padding: 10px; margin-bottom: 8px; cursor: pointer; }
+        .card:hover { background: #fafbfc; }
         .card .subject { font-weight: 600; font-size: 14px; }
         .card .meta { font-size: 12px; color: #5e6c84; margin-top: 4px; }
         .empty { color: #97a0af; font-size: 12px; padding: 6px; }
         label { font-size: 13px; color: #5e6c84; display: flex; align-items: center; gap: 6px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #fff; border-radius: 8px; padding: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #5e6c84; }
     </style>
 </head>
 <body>
     <header>
         <h1>Kanban urzędowy</h1>
+        <button class="btn" id="btn-refresh" data-testid="btn-refresh">Odśwież</button>
         <label><input type="checkbox" id="show-archived"> pokaż zarchiwizowane</label>
     </header>
     <main class="board" id="board"></main>
+
+    <div class="modal" id="email-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-subject"></h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
 
     <script>
         const STAGES = [
@@ -39,6 +59,7 @@
             const el = document.createElement('article');
             el.className = 'card';
             el.dataset.testid = 'card';
+            el.dataset.id = sprawa.id;
             const subject = document.createElement('div');
             subject.className = 'subject';
             subject.textContent = sprawa.subject || '(bez tematu)';
@@ -46,6 +67,9 @@
             meta.className = 'meta';
             meta.textContent = [sprawa.sender, sprawa.snippet].filter(Boolean).join(' — ');
             el.append(subject, meta);
+            if (sprawa.source === 'email') {
+                el.addEventListener('click', () => showEmail(sprawa.id));
+            }
             return el;
         }
 
@@ -78,7 +102,36 @@
             render(await res.json());
         }
 
+        async function syncGmail() {
+            const btn = document.getElementById('btn-refresh');
+            btn.disabled = true;
+            btn.textContent = 'Synchronizacja...';
+            try {
+                await fetch('/api/sync/gmail', { method: 'POST' });
+                await load();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Odśwież';
+            }
+        }
+
+        async function showEmail(id) {
+            const res = await fetch('/api/sprawy/' + id + '/email');
+            if (!res.ok) return;
+            const data = await res.json();
+            document.getElementById('modal-subject').textContent = data.subject;
+            document.getElementById('modal-body').innerHTML = `
+                <p><strong>Nadawca:</strong> ${data.sender}</p>
+                <p><strong>Fragment:</strong> ${data.snippet}</p>
+            `;
+            document.getElementById('email-modal').classList.add('active');
+        }
+
+        document.getElementById('btn-refresh').addEventListener('click', syncGmail);
         document.getElementById('show-archived').addEventListener('change', load);
+        document.getElementById('modal-close').addEventListener('click', () => {
+            document.getElementById('email-modal').classList.remove('active');
+        });
         load();
     </script>
 </body>
